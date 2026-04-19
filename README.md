@@ -25,8 +25,8 @@
 
 ###  Screenshots
 
-![Phase1-1](screenshots/Phase1/1a.jpeg)
-![Phase1-2](screenshots/Phase1/1b.jpeg)
+![Phase1-1](screenshots/Phase1/1a.png)
+![Phase1-2](screenshots/Phase1/1b.png)
 
 ---
 
@@ -38,8 +38,8 @@
 
 ###  Screenshots
 
-![Phase2-1](screenshots/Phase2/2a.jpeg)
-![Phase2-2](screenshots/Phase2/2b.jpeg)
+![Phase2-1](screenshots/Phase2/2a.png)
+![Phase2-2](screenshots/Phase2/2b.png)
 
 ---
 
@@ -51,8 +51,8 @@
 
 ###  Screenshots
 
-![Phase3-1](screenshots/Phase3/3a.jpeg)
-![Phase3-2](screenshots/Phase3/3b.jpeg)
+![Phase3-1](screenshots/Phase3/3a.png)
+![Phase3-2](screenshots/Phase3/3b.png)
 
 ---
 
@@ -64,9 +64,9 @@
 
 ###  Screenshots
 
-![Phase4-1](screenshots/Phase4/4a.jpeg)
-![Phase4-2](screenshots/Phase4/4b.jpeg)
-![Phase4-3](screenshots/Phase4/4c.jpeg)
+![Phase4-1](screenshots/Phase4/4a.png)
+![Phase4-2](screenshots/Phase4/4b.png)
+![Phase4-3](screenshots/Phase4/4c.png)
 
 ---
 
@@ -77,8 +77,8 @@
 
 ###  Screenshots
 
-![Final-1](screenshots/Final/final1.jpeg)
-![Final-2](screenshots/Final/final2.jpeg)
+![Final-1](screenshots/final/final1.png)
+![Final-2](screenshots/final/final2.png)
 
 ---
 
