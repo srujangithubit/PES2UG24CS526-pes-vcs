@@ -229,5 +229,27 @@ int commit_create(const char *message, ObjectID *commit_id_out) {
     } else {
         snprintf(commit.message, sizeof(commit.message), "no commit message");
     }
+    // 6. Serialize Commit struct into raw text for object storage
+    void *data = NULL;
+    size_t len = 0;
+    if (commit_serialize(&commit, &data, &len) != 0) {
+        return -1;
+    }
+
+    // 7. Write the commit object as a file in .pes/objects
+    if (object_write(OBJ_COMMIT, data, len, commit_id_out) != 0) {
+        free(data);
+        return -1;
+    }
+
+    // Free the buffer allocated by commit_serialize
+    free(data);
+
+    // 8. Update HEAD (or branch) to point to this new commit hash
+    if (head_update(commit_id_out) != 0) {
+        return -1;
+    }
+
+    return 0;
 
 }
