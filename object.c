@@ -123,6 +123,7 @@ int object_write(ObjectType type, const void *data, size_t len, ObjectID *id_out
 //
 // The caller is responsible for calling free(*data_out).
 // Returns 0 on success, -1 on error (file not found, corrupt, etc.).
+
 int object_read(const ObjectID *id, ObjectType *type_out, void **data_out, size_t *len_out) {
 
     // ───────────── Step 1: Build path ─────────────
@@ -148,5 +149,115 @@ int object_read(const ObjectID *id, ObjectType *type_out, void **data_out, size_
         fclose(fp);
         return -1;
     }
-    return -1;
+
+
+    // ───────────── Step 4: Allocate buffer ─────────────
+    unsigned char *buffer = (unsigned char *)malloc(file_size);
+
+    if (!buffer) {
+        fclose(fp);
+        return -1;
+    }
+
+
+    // ───────────── Step 5: Read file into buffer ─────────────
+    size_t read_bytes = fread(buffer, 1, file_size, fp);
+
+    if (read_bytes != (size_t)file_size) {
+        free(buffer);
+        fclose(fp);
+        return -1;
+    }
+
+    fclose(fp);
+
+
+    // ───────────── Step 6: Verify hash ─────────────
+    ObjectID computed;
+
+    compute_hash(buffer, file_size, &computed);
+
+    if (memcmp(computed.hash, id->hash, HASH_SIZE) != 0) {
+        free(buffer);
+        return -1;
+    }
+
+
+    // ───────────── Step 7: Find header separator ─────────────
+    unsigned char *null_ptr = memchr(buffer, '\0', file_size);
+
+    if (!null_ptr) {
+        free(buffer);
+        return -1;
+    }
+
+
+    // ───────────── Step 8: Extract header ─────────────
+    size_t header_len = (size_t)(null_ptr - buffer);
+
+    char *header = (char *)buffer;
+
+
+    // ───────────── Step 9: Parse object type ─────────────
+    if (strncmp(header, "blob", 4) == 0) {
+        *type_out = OBJ_BLOB;
+    }
+    else if (strncmp(header, "tree", 4) == 0) {
+        *type_out = OBJ_TREE;
+    }
+    else if (strncmp(header, "commit", 6) == 0) {
+        *type_out = OBJ_COMMIT;
+    }
+    else {
+        free(buffer);
+        return -1;
+    }
+
+
+    // ───────────── Step 10: Parse size from header ─────────────
+    size_t size;
+
+    int parsed = sscanf(header, "%*s %zu", &size);
+
+    if (parsed != 1) {
+        free(buffer);
+        return -1;
+    }
+
+
+    // ───────────── Step 11: Locate data section ─────────────
+    unsigned char *data_start = null_ptr + 1;
+
+
+    // ───────────── Step 12: Bounds check ─────────────
+    size_t total_required = (size_t)(data_start - buffer) + size;
+
+    if (total_required > (size_t)file_size) {
+        free(buffer);
+        return -1;
+    }
+
+
+    // ───────────── Step 13: Allocate output buffer ─────────────
+    void *out = malloc(size);
+
+    if (!out) {
+        free(buffer);
+        return -1;
+    }
+
+
+    // ───────────── Step 14: Copy data ─────────────
+    memcpy(out, data_start, size);
+
+
+    // ───────────── Step 15: Set outputs ─────────────
+    *data_out = out;
+    *len_out = size;
+
+
+    // ───────────── Step 16: Cleanup ─────────────
+    free(buffer);
+
+    return 0;
 }
