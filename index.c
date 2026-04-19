@@ -1,27 +1,36 @@
-// index.c — Staging area implementation
-//
-// Text format of .pes/index (one entry per line, sorted by path):
-//
-//   <mode-octal> <64-char-hex-hash> <mtime-seconds> <size> <path>
-//
-// Example:
-//   100644 a1b2c3d4e5f6...  1699900000 42 README.md
-//   100644 f7e8d9c0b1a2...  1699900100 128 src/main.c
-//
-// This is intentionally a simple text format. No magic numbers, no
-// binary parsing. The focus is on the staging area CONCEPT (tracking
-// what will go into the next commit) and ATOMIC WRITES (temp+rename).
-//
-// PROVIDED functions: index_find, index_remove, index_status
-// TODO functions:     index_load, index_save, index_add
+// ───────────── Header Files for Index Module ─────────────
 
+// Provides definitions for Index, IndexEntry, and related functions
 #include "index.h"
+
+// Provides core PES structures and object storage functions (e.g., object_write)
+#include "pes.h"
+
+
+// ───────────── Standard Library Headers ─────────────
+
+// Input/output operations (fopen, fread, fwrite, printf, etc.)
 #include <stdio.h>
+
+// Memory management (malloc, free, exit)
 #include <stdlib.h>
+
+// String manipulation functions (strcmp, strcpy, strlen, memcpy, etc.)
 #include <string.h>
+
+
+// ───────────── System Headers ─────────────
+
+// File metadata operations (stat, file size, modification time)
 #include <sys/stat.h>
+
+// File control options (low-level file descriptors, flags)
 #include <fcntl.h>
+
+// POSIX system calls (read, write, close, access, etc.)
 #include <unistd.h>
+
+// Directory handling (opendir, readdir, closedir)
 #include <dirent.h>
 
 // ─── PROVIDED ────────────────────────────────────────────────────────────────
