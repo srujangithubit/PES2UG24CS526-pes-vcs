@@ -223,6 +223,62 @@ static int build_tree(IndexEntry *entries, int count, const char *prefix, Object
 
                 j++;
             }
+/ ───────────── Step 2D: Build new prefix ─────────────
+            char new_prefix[512];
+
+            if (prefix && strlen(prefix) > 0) {
+                snprintf(new_prefix, sizeof(new_prefix), "%s%s/", prefix, dirname);
+            } else {
+                snprintf(new_prefix, sizeof(new_prefix), "%s/", dirname);
+            }
+
+
+            // ───────────── Step 2E: Recursive call ─────────────
+            ObjectID sub_id;
+
+            if (build_tree(sub_entries, sub_count, new_prefix, &sub_id) != 0) {
+                return -1;
+            }
+
+
+            // ───────────── Step 2F: Add directory entry ─────────────
+            TreeEntry *entry = &tree.entries[tree.count++];
+
+            entry->mode = MODE_DIR;
+
+            strcpy(entry->name, dirname);
+
+            entry->hash = sub_id;
+
+
+            // Skip all processed entries
+            i += sub_count;
+        }
+    }
+
+
+    // ───────────── Step 3: Serialize tree ─────────────
+    void *data;
+    size_t len;
+
+    if (tree_serialize(&tree, &data, &len) != 0) {
+        return -1;
+    }
+
+
+    // ───────────── Step 4: Write tree object ─────────────
+    if (object_write(OBJ_TREE, data, len, id_out) != 0) {
+        free(data);
+        return -1;
+    }
+
+
+    // ───────────── Step 5: Cleanup ─────────────
+    free(data);
+
+
+    // ───────────── Step 6: Success ─────────────
+    return 0;
 }
 
 int tree_from_index(ObjectID *id_out) {
