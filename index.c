@@ -143,11 +143,47 @@ int index_status(const Index *index) {
 //   - hex_to_hash                      : converting the parsed string to ObjectID
 //
 // Returns 0 on success, -1 on error.
-int index_load(Index *index) {
-    // TODO: Implement index loading
-    // (See Lab Appendix for logical steps)
-    (void)index;
-    return -1;
+int index_load(Index *idx) {
+
+    // Open index file in binary read mode
+    FILE *fp = fopen(".pes/index", "rb");
+
+
+    // ───────────── Case: Index file does not exist ─────────────
+    // This happens on first run (no files staged yet)
+    if (!fp) {
+        idx->count = 0;   // Initialize empty index
+        return 0;
+    }
+
+
+    // ───────────── Step 1: Read number of entries ─────────────
+    fread(&idx->count, sizeof(int), 1, fp);
+
+
+    // ───────────── Step 2: Validate entry count ─────────────
+    // Prevent overflow or corrupted index file
+    if (idx->count > MAX_INDEX_ENTRIES) {
+        fclose(fp);
+        return -1;
+    }
+
+
+    // ───────────── Step 3: Read all entries ─────────────
+    fread(
+        idx->entries,
+        sizeof(IndexEntry),
+        idx->count,
+        fp
+    );
+
+
+    // ───────────── Step 4: Close file ─────────────
+    fclose(fp);
+
+
+    // ───────────── Load successful ─────────────
+    return 0;
 }
 
 // Save the index to .pes/index atomically.
